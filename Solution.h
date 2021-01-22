@@ -414,7 +414,7 @@ public:
 
                 string b1 = b.substr(0, int(b.size() / 2));
                 string b2 = b.substr(int(b.size() / 2) + b.size() % 2);
-                reverse(b2.begin(), b2.end());
+                std::reverse(b2.begin(), b2.end());
                 if (b1 == b2)
                     max_size = b;
             }
@@ -643,9 +643,9 @@ public:
      */
     void rotate(vector<int>& nums, int k) {
         k %= nums.size();
-        reverse(nums.begin(), nums.end());
-        reverse(nums.begin(), nums.begin()+k);
-        reverse(nums.begin()+k, nums.end());
+        std::reverse(nums.begin(), nums.end());
+        std::reverse(nums.begin(), nums.begin()+k);
+        std::reverse(nums.begin()+k, nums.end());
     }
 
     /**
@@ -772,6 +772,26 @@ public:
         return result;
     }
 
+    /**
+     * Given a signed 32-bit integer x, return x with its digits reversed. If reversing x causes the value to go
+     * outside the signed 32-bit integer range [-231, 231 - 1], then return 0.
+     * @param x
+     * @return
+     */
+    int reverse(int x) {
+        int rem, result = 0;
+        while(x!=0)
+        {
+            rem=x%10;
+            if (result > INT_MAX/10 || (result == INT_MAX / 10 && rem > 7)) return 0;
+            if (result < INT_MIN/10 || (result == INT_MIN / 10 && rem < -8)) return 0;
+
+            result = result * 10 + rem;
+            x/=10;
+        }
+
+        return result;
+    }
 };
 
 
