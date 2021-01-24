@@ -964,6 +964,188 @@ public:
 
         return result;
     }
+
+    /**
+     * You are given an n x n 2D matrix representing an image, rotate the image by 90 degrees (clockwise).
+     * You have to rotate the image in-place, which means you have to modify the input 2D matrix directly.
+     * DO NOT allocate another 2D matrix and do the rotation.
+     * @param matrix
+     */
+    void rotate(vector<vector<int>>& matrix) {
+        int n = matrix.size();
+        for (int i = 0; i < n / 2 + n % 2; ++i) {
+            for (int j = 0; j < n / 2; ++j) {
+                int tmp = matrix[i][j];
+                matrix[i][j] = matrix[n - j - 1][i];
+                matrix[n - j - 1][i] = matrix[n - i - 1][n - j - 1];
+                matrix[n - i - 1][n - j - 1] = matrix[j][n - i - 1];
+                matrix[j][n - i - 1] = tmp;
+            }
+        }
+    }
+
+    /**
+     * Write a function that reverses a string. The input string is given as an array of characters char[].
+     * Do not allocate extra space for another array, you must do this by modifying the input array in-place with O(1) extra memory.
+     * You may assume all the characters consist of printable ascii characters.
+     * @param s
+     */
+    void reverseString(vector<char>& s) {
+        s = {s.rbegin(), s.rend()};
+    }
+
+    /**
+     * Given a string, find the first non-repeating character in it and return its index. If it doesn't exist, return -1.
+     * @param s
+     * @return
+     */
+    int firstUniqChar(string s) {
+        set<char> symbols;
+        for (int i = 0; i < s.size(); ++i) {
+            if (symbols.find(s[i]) != symbols.end())
+                continue;
+
+            if (s.find(s[i], i+1) != string::npos) {
+                symbols.insert(s[i]);
+                continue;
+            }
+
+            return i;
+        }
+
+        return -1;
+    }
+
+    /**
+     * Given two strings s and t , write a function to determine if t is an anagram of s.
+     * @param s
+     * @param t
+     * @return
+     */
+    bool isAnagram(string s, string t) {
+        if (s.size() != t.size())
+            return false;
+
+        sort(s.begin(), s.end());
+        sort(t.begin(), t.end());
+
+        if (s != t)
+            return false;
+
+        return true;
+    }
+
+    /**
+     * Given a string, determine if it is a palindrome, considering only alphanumeric characters and ignoring cases.
+     * Note: For the purpose of this problem, we define empty string as valid palindrome.
+     * @param s
+     * @return
+     */
+    bool isPalindrome(string s) {
+        if (s.size() < 2)
+            return true;
+
+        int i = 0;
+        int j = s.size() - 1;
+
+        while (i < j) {
+            for (; i < s.size(); ++i) {
+                s[i] = tolower(s[i]);
+                if (((int) s[i] >= 97 && (int) s[i] <= 122) || ((int) s[i] >= 48 && (int) s[i] <= 57))
+                    break;
+            }
+
+            for (; j >= 0; --j) {
+                s[j] = tolower(s[j]);
+                if (((int) s[j] >= 97 && (int) s[j] <= 122) || ((int) s[j] >= 48 && (int) s[j] <= 57))
+                    break;
+            }
+
+            if (i >= j)
+                return true;
+
+            if (s[i] != s[j])
+                return false;
+
+            ++i;
+            --j;
+        }
+
+        return true;
+    }
+
+    /**
+     * Implement the myAtoi(string s) function, which converts a string to a 32-bit signed integer (similar to C/C++'s atoi function).
+     * The algorithm for myAtoi(string s) is as follows:
+     * Read in and ignore any leading whitespace.
+     * Check if the next character (if not already at the end of the string) is '-' or '+'. Read this character in if it is either.
+     * This determines if the final result is negative or positive respectively. Assume the result is positive if neither is present.
+     * Read in next the characters until the next non-digit charcter or the end of the input is reached. The rest of the string is ignored.
+     * Convert these digits into an integer (i.e. "123" -> 123, "0032" -> 32). If no digits were read, then the integer is 0.
+     * Change the sign as necessary (from step 2).
+     * If the integer is out of the 32-bit signed integer range [-231, 231 - 1], then clamp the integer so that it remains in the range.
+     * Specifically, integers less than -231 should be clamped to -231, and integers greater than 231 - 1 should be clamped to 231 - 1.
+     * Return the integer as the final result.
+     * Note:
+     * Only the space character ' ' is considered a whitespace character.
+     * Do not ignore any characters other than the leading whitespace or the rest of the string after the digits.
+     * @param s
+     * @return
+     */
+    int myAtoi(string s) {
+        if (s.size() == 0)
+            return 0;
+        string subs;
+        for (char symbol: s) {
+            if ((symbol == '+') || symbol == '-') {
+                if (subs.size() != 0)
+                    break;
+
+                subs = symbol;
+                continue;
+            }
+
+            if (symbol == '0') {
+                if (subs.size() == 0) {
+                    subs = '0';
+                    continue;
+                }
+
+                if ((subs == "-") || (subs == "+") || (subs == "0"))
+                    continue;
+            }
+
+            if ((symbol >= 48) && (symbol <= 57)) {
+                subs += symbol;
+                continue;
+            }
+
+            if ((symbol == ' ') && (subs.size() == 0))
+                continue;
+
+            break;
+        }
+
+        if (subs.size() == 0)
+            return 0;
+
+        if ((subs == "-") || (subs == "+"))
+            return 0;
+
+        if (subs.size() > 11) {
+            if (subs[0] == '-')
+                return INT32_MIN;
+            return INT32_MAX;
+        }
+
+        long long res = stoll(subs);
+        if (res > INT32_MAX)
+            return INT32_MAX;
+        if (res < INT32_MIN)
+            return INT32_MIN;
+
+        return res;
+    }
 };
 
 
