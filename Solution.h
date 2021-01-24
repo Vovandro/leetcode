@@ -2,6 +2,7 @@
 #include <vector>
 #include <set>
 #include <map>
+#include <cmath>
 
 #ifndef LEETCODE_SOLUTION_H
 #define LEETCODE_SOLUTION_H
@@ -223,8 +224,9 @@ public:
      */
     vector<int> twoSum(vector<int>& nums, int target) {
         for (int i = 0; i < nums.size() - 1; ++i) {
+            int x = target - nums[i];
             for (int j = i + 1; j < nums.size(); ++j) {
-                if (nums[i] + nums[j] == target)
+                if (nums[j] == x)
                     return vector<int>({i, j});
             }
         }
@@ -791,6 +793,124 @@ public:
         }
 
         return result;
+    }
+
+    /**
+     * You are given an array of k linked-lists lists, each linked-list is sorted in ascending order.
+     * Merge all the linked-lists into one sorted linked-list and return it.
+     * @param lists
+     * @return
+     */
+    ListNode* mergeKLists(vector<ListNode*>& lists) {
+        ListNode* result = nullptr;
+        ListNode* last = nullptr;
+
+        if (lists.size() == 0)
+            return nullptr;
+
+        if (lists.size() == 1)
+            return lists[0];
+
+        while (!lists.empty()) {
+            int min_val = 1000000;
+            int min_id = -1;
+
+            for (int i = 0; i < lists.size(); i++) {
+                if (lists[i] == nullptr) {
+                    lists.erase(lists.begin() + i);
+                    i--;
+                    continue;
+                }
+
+                if (lists[i]->val < min_val) {
+                    min_val = lists[i]->val;
+                    min_id = i;
+                }
+            }
+
+            if (min_val == 1000000)
+                return result;
+
+            if (result == nullptr) {
+                result = new ListNode(min_val);
+                last = result;
+            } else {
+                last->next = new ListNode(min_val);
+                last = last->next;
+            }
+
+            if (lists[min_id]->next == nullptr) {
+                lists.erase(lists.begin() + min_id);
+            } else {
+                lists[min_id] = lists[min_id]->next;
+            }
+
+            if (lists.size() == 1) {
+                last->next = lists[0];
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Merge two sorted linked lists and return it as a sorted list.
+     * The list should be made by splicing together the nodes of the first two lists.
+     * @param l1
+     * @param l2
+     * @return
+     */
+    ListNode* mergeTwoLists(ListNode* l1, ListNode* l2) {
+        if (l1 == nullptr)
+            return l2;
+
+        if (l2 == nullptr)
+            return l1;
+
+        ListNode* result = nullptr;
+        ListNode* last = nullptr;
+
+        while (true) {
+            if (l1 == nullptr) {
+                last->next = l2;
+                break;
+            }
+
+            if (l2 == nullptr) {
+                last->next = l1;
+                break;
+            }
+            int min_val = 0;
+
+            if (l1->val < l2->val) {
+                min_val = l1->val;
+                l1 = l1->next;
+            } else {
+                min_val = l2->val;
+                l2 = l2->next;
+            }
+
+            if (result == nullptr) {
+                result = new ListNode(min_val);
+                last = result;
+            } else {
+                last->next = new ListNode(min_val);
+                last = last->next;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Given a non-negative integer x, compute and return the square root of x.
+     * Since the return type is an integer, the decimal digits are truncated, and only the integer part of the result is returned.
+     * @param x
+     * @return
+     */
+    int mySqrt(int x) {
+        return int(sqrt(x));
     }
 };
 
