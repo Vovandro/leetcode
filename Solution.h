@@ -912,6 +912,58 @@ public:
     int mySqrt(int x) {
         return int(sqrt(x));
     }
+
+    /**
+     * Given two sorted arrays nums1 and nums2 of size m and n respectively, return the median of the two sorted arrays.
+     * Follow up: The overall run time complexity should be O(log (m+n))
+     * @param nums1
+     * @param nums2
+     * @return
+     */
+    double findMedianSortedArrays(vector<int> nums1, vector<int> nums2) {
+        if (nums1.size() == 0 && nums2.size() == 0)
+            return 0;
+
+        nums1.insert(nums1.end(), nums2.begin(), nums2.end());
+        sort(nums1.begin(), nums1.end());
+
+        if (nums1.size() % 2 == 0) {
+            return (nums1[int(nums1.size() / 2)] + nums1[int(nums1.size() / 2) - 1]) / 2.0f;
+        }
+
+        return nums1[int(nums1.size() / 2)];
+    }
+
+    /**
+     * The string "PAYPALISHIRING" is written in a zigzag pattern on a given number of rows like this
+     * And then read line by line: "PAHNAPLSIIGYIR"
+     * @param s
+     * @param numRows
+     * @return
+     */
+    string convert(string s, int numRows) {
+        if (numRows == 1)
+            return s;
+
+        if (s.size() <= numRows)
+            return s;
+
+        string result;
+
+        for (int i = 0; i < numRows; ++i) {
+            int j = i;
+            while ((j - i * 2) < int(s.size())) {
+                if (i != 0 && i != numRows - 1 && j > numRows) {
+                    result += s[j - i * 2];
+                }
+                if (j < s.size())
+                    result += s[j];
+                j += numRows + numRows - 2;
+            }
+        }
+
+        return result;
+    }
 };
 
 
