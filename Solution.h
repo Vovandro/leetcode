@@ -1146,6 +1146,53 @@ public:
 
         return res;
     }
+
+    /**
+     * Implement strStr().
+     * Return the index of the first occurrence of needle in haystack, or -1 if needle is not part of haystack.
+     * @param haystack
+     * @param needle
+     * @return
+     */
+    int strStr(string haystack, string needle) {
+        auto pos = haystack.find(needle);
+        if (pos == string::npos)
+            return -1;
+        return pos;
+    }
+
+    /**
+     * Given an array nums of 0s and 1s and an integer k, return True if all 1's are at least k places away from each other, otherwise return False.
+     * @param nums
+     * @param k
+     * @return
+     */
+    bool kLengthApart(vector<int>& nums, int k) {
+        if (k == 0)
+            return true;
+
+        int count = 0;
+        bool first = false;
+        for (int num: nums) {
+            if (num == 1) {
+                if (!first) {
+                    first = true;
+                    count = 0;
+                    continue;
+                }
+
+                if (count < k)
+                    return false;
+
+                count = 0;
+                continue;
+            }
+
+            count++;
+        }
+
+        return true;
+    }
 };
 
 
