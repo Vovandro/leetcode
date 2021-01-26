@@ -18,6 +18,10 @@ struct ListNode {
     ListNode(int x, ListNode *next) : val(x), next(next) {}
 };
 
+struct Nodes {
+    int nodes[4] {-1,-1,-1,-1};
+};
+
 class Solution {
 public:
     /**
@@ -1192,6 +1196,171 @@ public:
         }
 
         return true;
+    }
+
+    /**
+     * The count-and-say sequence is a sequence of digit strings defined by the recursive formula:
+     * countAndSay(1) = "1"
+     * countAndSay(n) is the way you would "say" the digit string from countAndSay(n-1), which is then converted into a different digit string.
+     * To determine how you "say" a digit string, split it into the minimal number of groups so that each group is a contiguous section all of the same
+     * character. Then for each group, say the number of characters, then say the character. To convert the saying into a digit string, replace the counts
+     * with a number and concatenate every saying
+     * @param n
+     * @return
+     */
+    string countAndSay(int n) {
+        if (n == 1)
+            return "1";
+
+        string buf = countAndSay(n-1);
+        string result;
+
+        int count = 0;
+        char last = buf[0];
+
+        for (auto symbol: buf) {
+            if (last == symbol) {
+                count++;
+                continue;
+            } else {
+                result += to_string(count) + last;
+                last = symbol;
+                count = 1;
+            }
+        }
+
+        result += to_string(count) + last;
+
+        return result;
+    }
+
+    /**
+     * You are a hiker preparing for an upcoming hike. You are given heights, a 2D array of size rows x columns, where
+     * heights[row][col] represents the height of cell (row, col). You are situated in the top-left cell, (0, 0),
+     * and you hope to travel to the bottom-right cell, (rows-1, columns-1) (i.e., 0-indexed). You can move up, down,
+     * left, or right, and you wish to find a route that requires the minimum effort.
+     * A route's effort is the maximum absolute difference in heights between two consecutive cells of the route.
+     * Return the minimum effort required to travel from the top-left cell to the bottom-right cell.
+     * @param heights
+     * @return
+     */
+    int StepGraph(const vector<vector<Nodes>>& graph, const int& k, const int &next_k, set<int> last_id, int i, int j) {
+        if ((i == graph.size() - 1) && (j == graph[0].size() - 1))
+            return -1;
+
+        last_id.insert(i * graph.size() + j);
+        int next = next_k;
+
+        if ((j != 0) && (j != graph[i].size())) {
+            if (graph[i][j].nodes[0] >= 0) {
+                if (graph[i][j].nodes[0] <= k) {
+                    if (last_id.find((i - 1) * graph.size() + j) == last_id.end()) {
+                        int next_step = StepGraph(graph, k, next_k, last_id, i - 1, j);
+                        if (next_step == -1)
+                            return next_step;
+
+                        if ((next_step > k) && (next_step < next_k))
+                            next = next_k;
+                    }
+                } else {
+                    next = min(next, graph[i][j].nodes[0]);
+                }
+            }
+        }
+
+        if (graph[i][j].nodes[1] >= 0) {
+            if (graph[i][j].nodes[1] <= k) {
+                if (last_id.find(i * graph.size() + j + 1) == last_id.end()) {
+                    int next_step = StepGraph(graph, k, next_k, last_id, i, j + 1);
+                    if (next_step == -1)
+                        return next_step;
+
+                    if ((next_step > k) && (next_step < next))
+                        next = next_step;
+                }
+            } else {
+                next = min(next, graph[i][j].nodes[1]);
+            }
+        }
+
+        if (graph[i][j].nodes[2] >= 0) {
+            if (graph[i][j].nodes[2] <= k) {
+                if (last_id.find((i + 1) * graph.size() + j) == last_id.end()) {
+                    int next_step = StepGraph(graph, k, next_k, last_id, i + 1, j);
+                    if (next_step == -1)
+                        return next_step;
+
+                    if ((next_step > k) && (next_step < next))
+                        next = next_step;
+                }
+            } else {
+                next = min(next, graph[i][j].nodes[2]);
+            }
+        }
+
+        if ((i != 0) && (i != graph.size() - 1)) {
+            if (graph[i][j].nodes[3] >= 0) {
+                if (graph[i][j].nodes[3] <= k) {
+                    if (last_id.find(i * graph.size() + j - 1) == last_id.end()) {
+                        int next_step = StepGraph(graph, k, next_k, last_id, i, j - 1);
+                        if (next_step == -1)
+                            return next_step;
+
+                        if ((next_step > k) && (next_step < next))
+                            next = next_step;
+                    }
+                } else {
+                    next = min(next, graph[i][j].nodes[3]);
+                }
+            }
+        }
+
+        return next;
+    };
+
+    int minimumEffortPath(vector<vector<int>>& heights) {
+        if (heights.size() == 1) {
+            if (heights[0].size() == 1)
+                return 0;
+        }
+
+        vector<vector<Nodes>> graph;
+
+        for (int i = 0; i < heights.size(); ++i) {
+            vector<Nodes> row;
+            for (int j = 0; j < heights[i].size(); ++j) {
+                Nodes node;
+                if (i != 0)
+                    node.nodes[0] = abs(heights[i][j] - heights[i - 1][j]);
+                if (j != heights[i].size() - 1)
+                    node.nodes[1] = abs(heights[i][j] - heights[i][j + 1]);
+                if (i != heights.size() - 1)
+                    node.nodes[2] = abs(heights[i][j] - heights[i + 1][j]);
+                if (j != 0)
+                    node.nodes[3] = abs(heights[i][j] - heights[i][j - 1]);
+                row.push_back(node);
+            }
+
+            graph.push_back(row);
+        }
+
+        int k = min(graph[0][0].nodes[1], graph[0][0].nodes[2]);
+        int next_k = max(graph[0][0].nodes[1], graph[0][0].nodes[2]);
+        bool find = true;
+
+        while (find) {
+            set<int> last_id;
+            next_k = StepGraph(graph, k, next_k, last_id, 0, 0);
+
+            if (next_k == -1)
+                find = false;
+            else {
+                k = next_k;
+                next_k += 1000;
+            }
+        }
+
+        return k;
     }
 };
 
