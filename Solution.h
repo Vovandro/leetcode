@@ -20,6 +20,16 @@ struct ListNode {
 
 struct Nodes {
     int nodes[4] {-1,-1,-1,-1};
+    bool is_check = false;
+};
+
+struct TreeNode {
+    int val;
+    TreeNode *left;
+    TreeNode *right;
+    TreeNode() : val(0), left(nullptr), right(nullptr) {}
+    TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+    TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
 };
 
 class Solution {
@@ -1244,78 +1254,43 @@ public:
      * @param heights
      * @return
      */
-    int StepGraph(const vector<vector<Nodes>>& graph, const int& k, const int &next_k, set<int> last_id, int i, int j) {
-        if ((i == graph.size() - 1) && (j == graph[0].size() - 1))
-            return -1;
+    bool checkPatch(const vector<vector<Nodes>> &graph, set<int> &patch, const int& k, int i = 0, int j = 0) {
+        if ((graph[i][j].is_check) && (i == graph.size() - 1) && (j == graph[0].size() - 1))
+            return true;
 
-        last_id.insert(i * graph.size() + j);
-        int next = next_k;
+        if ((patch.find(i * graph[0].size() + j) != patch.end()) || (!graph[i][j].is_check))
+            return false;
 
-        if ((j != 0) && (j != graph[i].size())) {
-            if (graph[i][j].nodes[0] >= 0) {
-                if (graph[i][j].nodes[0] <= k) {
-                    if (last_id.find((i - 1) * graph.size() + j) == last_id.end()) {
-                        int next_step = StepGraph(graph, k, next_k, last_id, i - 1, j);
-                        if (next_step == -1)
-                            return next_step;
+        patch.insert(i * graph[0].size() + j);
 
-                        if ((next_step > k) && (next_step < next_k))
-                            next = next_k;
-                    }
-                } else {
-                    next = min(next, graph[i][j].nodes[0]);
-                }
-            }
-        }
+        bool result = false;
 
-        if (graph[i][j].nodes[1] >= 0) {
-            if (graph[i][j].nodes[1] <= k) {
-                if (last_id.find(i * graph.size() + j + 1) == last_id.end()) {
-                    int next_step = StepGraph(graph, k, next_k, last_id, i, j + 1);
-                    if (next_step == -1)
-                        return next_step;
+        if (i != graph.size() - 1)
+            if (graph[i+1][j].nodes[2] <= k)
+                result = checkPatch(graph, patch, k, i + 1, j);
 
-                    if ((next_step > k) && (next_step < next))
-                        next = next_step;
-                }
-            } else {
-                next = min(next, graph[i][j].nodes[1]);
-            }
-        }
+        if (result)
+            return true;
 
-        if (graph[i][j].nodes[2] >= 0) {
-            if (graph[i][j].nodes[2] <= k) {
-                if (last_id.find((i + 1) * graph.size() + j) == last_id.end()) {
-                    int next_step = StepGraph(graph, k, next_k, last_id, i + 1, j);
-                    if (next_step == -1)
-                        return next_step;
+        if (j != graph[0].size() - 1)
+            if (graph[i][j+1].nodes[1] <= k)
+                result = checkPatch(graph, patch, k, i, j + 1);
 
-                    if ((next_step > k) && (next_step < next))
-                        next = next_step;
-                }
-            } else {
-                next = min(next, graph[i][j].nodes[2]);
-            }
-        }
+        if (result)
+            return true;
 
-        if ((i != 0) && (i != graph.size() - 1)) {
-            if (graph[i][j].nodes[3] >= 0) {
-                if (graph[i][j].nodes[3] <= k) {
-                    if (last_id.find(i * graph.size() + j - 1) == last_id.end()) {
-                        int next_step = StepGraph(graph, k, next_k, last_id, i, j - 1);
-                        if (next_step == -1)
-                            return next_step;
+        if ((i != 0) && (j != 0) && (j != graph[0].size() - 1))
+            if (graph[i-1][j].nodes[0] <= k)
+                result = checkPatch(graph, patch, k, i - 1, j);
 
-                        if ((next_step > k) && (next_step < next))
-                            next = next_step;
-                    }
-                } else {
-                    next = min(next, graph[i][j].nodes[3]);
-                }
-            }
-        }
+        if (result)
+            return true;
 
-        return next;
+        if ((j != 0) && (i != 0) && (i != graph.size() - 1))
+            if (graph[i][j-1].nodes[3] <= k)
+                result = checkPatch(graph, patch, k, i, j - 1);
+
+        return result;
     };
 
     int minimumEffortPath(vector<vector<int>>& heights) {
@@ -1344,23 +1319,141 @@ public:
             graph.push_back(row);
         }
 
-        int k = min(graph[0][0].nodes[1], graph[0][0].nodes[2]);
-        int next_k = max(graph[0][0].nodes[1], graph[0][0].nodes[2]);
-        bool find = true;
+        int k = max(min(graph[0][0].nodes[1], graph[0][0].nodes[2]),
+                    min(graph[graph.size()-1][graph[0].size()-1].nodes[3], graph[graph.size()-1][graph[0].size()-1].nodes[0]));
+        int next_k = min(max(graph[0][0].nodes[1], graph[0][0].nodes[2]),
+                         max(graph[graph.size()-1][graph[0].size()-1].nodes[3], graph[graph.size()-1][graph[0].size()-1].nodes[0]));
 
-        while (find) {
-            set<int> last_id;
-            next_k = StepGraph(graph, k, next_k, last_id, 0, 0);
+        while (true) {
+            for (int i = 0; i < graph.size(); ++i) {
+                for (int j = 0; j < graph[i].size(); ++j) {
+                    for (int q = 0; q < 4; ++q) {
+                        if (graph[i][j].nodes[q] == -1)
+                            continue;
 
-            if (next_k == -1)
-                find = false;
-            else {
-                k = next_k;
-                next_k += 1000;
+                        if (graph[i][j].nodes[q] <= k) {
+                            graph[i][j].is_check = true;
+                        } else if (graph[i][j].nodes[q] > k) {
+                            if (graph[i][j].nodes[q] < next_k)
+                                next_k = graph[i][j].nodes[q];
+                        }
+                    }
+                }
             }
+            set<int> patch;
+            if (checkPatch(graph, patch, k))
+                break;
+
+            k = next_k;
+            next_k += 10000;
         }
 
         return k;
+    }
+
+    /**
+     * Given the root of a binary search tree and the lowest and highest boundaries as low and high, trim the tree so that
+     * all its elements lies in [low, high]. Trimming the tree should not change the relative structure of the elements
+     * that will remain in the tree (i.e., any node's descendant should remain a descendant). It can be proven that there is a unique answer.
+     *
+     * Return the root of the trimmed binary search tree. Note that the root may change depending on the given bounds.
+     * @param root
+     * @param low
+     * @param high
+     * @return
+     */
+    TreeNode* trimBST(TreeNode* root, int low, int high) {
+        if (root == nullptr)
+            return root;
+
+        if (root->left != nullptr) {
+            root->left = trimBST(root->left, low, high);
+        }
+
+        if (root->right != nullptr) {
+            root->right = trimBST(root->right, low, high);
+        }
+
+        if ((root->val >= low) && (root->val <= high))
+            return root;
+        else {
+            if (root->left != nullptr)
+                return root->left;
+            else
+                return root->right;
+        }
+    }
+
+    /**
+     * Write a function to delete a node in a singly-linked list. You will not be given access to the head of the list,
+     * instead you will be given access to the node to be deleted directly.
+     * It is guaranteed that the node to be deleted is not a tail node in the list.
+     * @param node
+     */
+    void deleteNode(ListNode* node) {
+        node->val = node->next->val;
+        node->next = node->next->next;
+    }
+
+    /**
+     * Given the head of a linked list, remove the nth node from the end of the list and return its head.
+     * Follow up: Could you do this in one pass?
+     * @param head
+     * @param n
+     * @return
+     */
+    ListNode* removeNthFromEnd(ListNode* head, int n) {
+        ListNode* point_find = nullptr;
+        ListNode* cyr = head;
+        int i = 0;
+
+        while (cyr != nullptr) {
+            if (i > n) {
+                point_find = point_find->next;
+            }
+
+            if (i == n) {
+                point_find = head;
+            }
+
+            i++;
+            cyr = cyr->next;
+        }
+
+        if (point_find == nullptr)
+            return head->next;
+
+        if (point_find == head) {
+            head->next = head->next->next;
+            return head;
+        }
+
+        point_find->next = point_find->next->next;
+
+        return head;
+    }
+
+    /**
+     * Reverse a singly linked list.
+     * @param head
+     * @return
+     */
+    ListNode* reverseList(ListNode* head) {
+        if (head == nullptr)
+            return head;
+
+        if (head->next) {
+            auto buf = reverseList(head->next);
+            auto point = buf;
+            while (point->next) {
+                point = point->next;
+            }
+            head->next = nullptr;
+            point->next = head;
+            return buf;
+        }
+
+        return head;
     }
 };
 
