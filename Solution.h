@@ -1455,6 +1455,59 @@ public:
 
         return head;
     }
+
+    /**
+     * Given head, the head of a linked list, determine if the linked list has a cycle in it.
+     * There is a cycle in a linked list if there is some node in the list that can be reached again by continuously
+     * following the next pointer. Internally, pos is used to denote the index of the node that tail's next pointer is
+     * connected to. Note that pos is not passed as a parameter.
+     *
+     * Return true if there is a cycle in the linked list. Otherwise, return false.
+     *
+     * Constraints:
+     * The number of the nodes in the list is in the range [0, 104].
+     * -10^5 <= Node.val <= 10^5
+     * pos is -1 or a valid index in the linked-list.
+     * Follow up: Can you solve it using O(1) (i.e. constant) memory?
+     *
+     * @param head
+     * @return
+     */
+    bool hasCycle(ListNode *head) {
+        while (head != nullptr) {
+            if (head->val > 1000000)
+                return true;
+
+            head->val = 1000001;
+            head = head->next;
+        }
+
+        return false;
+    }
+
+    /**
+     * Given an integer x, return true if x is palindrome integer.
+     * An integer is a palindrome when it reads the same backward as forward. For example, 121 is palindrome while 123 is not.
+     *
+     * Follow up: Could you solve it without converting the integer to a string?
+     *
+     * @param x
+     * @return
+     */
+    bool isPalindrome(int x) {
+        if (x < 0 || (x % 10 == 0 && x != 0))
+            return false;
+
+        int num = 0;
+
+        while (x > num) {
+            int buf = x % 10;
+            x = x / 10;
+            num = num * 10 + buf;
+        }
+
+        return x == num || x == num/10;
+    }
 };
 
 
